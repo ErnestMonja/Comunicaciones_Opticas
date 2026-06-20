@@ -184,11 +184,11 @@ for ebno in ebno_range:
     ber_teo_qam16.append(ber_theoretical(ebno, 16))
 
 plt.figure(figsize=(8, 6))
-plt.semilogy(ebno_range, ber_teo_qpsk, 'r-', lw=2, label='Teórica QPSK')
-plt.semilogy(ebno_range, ber_sim_qpsk, 'ro', label='Simulada QPSK')
+plt.semilogy(ebno_range, ber_teo_qpsk, 'r-', lw=2, label='QPSK Teórica ')
+plt.semilogy(ebno_range, ber_sim_qpsk, 'ro', label='QPSK Simulada')
 
-plt.semilogy(ebno_range, ber_teo_qam16, 'b-', lw=2, label='Teórica 16-QAM')
-plt.semilogy(ebno_range, ber_sim_qam16, 'bs', label='Simulada 16-QAM')
+plt.semilogy(ebno_range, ber_teo_qam16, 'b-', lw=2, label='QAM-16 Teórica')
+plt.semilogy(ebno_range, ber_sim_qam16, 'bs', label='QAM-16 Simulada')
 
 plt.ylim([1e-6, 1])
 plt.title("Curvas de BER vs $E_b/N_0$")
