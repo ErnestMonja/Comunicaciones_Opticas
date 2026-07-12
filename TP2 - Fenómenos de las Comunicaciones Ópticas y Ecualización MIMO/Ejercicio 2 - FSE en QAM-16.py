@@ -9,9 +9,11 @@ import warnings
 warnings.filterwarnings('ignore')
 plt.close("all")
 
-# ==============================================================================
-# FUNCIONES BASE Y DE COMUNICACIONES
-# ==============================================================================
+
+
+# --------------------------------------------------------------------------------------------------
+# Funciones Base y comunicaciones
+# --------------------------------------------------------------------------------------------------
 def qammod(symbols, M):
     m = int(np.sqrt(M))
     niv = (symbols % m)
@@ -46,9 +48,11 @@ def root_raised_cosine(BR, fs, rolloff, n_taps):
             h[i] = num / den
     return h / np.sqrt(np.sum(h**2))
 
-# ==============================================================================
-# FSE EQUALIZER ACCELERADO CON NUMBA
-# ==============================================================================
+
+
+# --------------------------------------------------------------------------------------------------
+# Ecualizador FSE: Acelerado con librería "Numba"
+# --------------------------------------------------------------------------------------------------
 @njit
 def fse_core(y, w, Ntaps, mu, N_sps, R_CMA, cma_limit, constellation):
     L = len(y)
@@ -112,9 +116,11 @@ def fse_equalizer(y, M, Ntaps, mu, N_sps, h_rrc, cma_frac=0.25):
         return None, None
     return out_sym, err_hist
 
-# ==============================================================================
-# SIMULADOR PRINCIPAL
-# ==============================================================================
+
+
+# --------------------------------------------------------------------------------------------------
+# Simulador Principal
+# --------------------------------------------------------------------------------------------------
 def simular_fse(M, L, BR, N, rolloff, h_taps, EbNo_db, Ntaps, mu, BW_limit=False, return_full=False):
     fs = N * BR
     k = np.log2(M)
@@ -177,9 +183,11 @@ def simular_fse(M, L, BR, N, rolloff, h_taps, EbNo_db, Ntaps, mu, BW_limit=False
         return ber, r_t_down, rx_aligned, err_hist
     return ber
 
-# ==============================================================================
-# BARRIDO Y OBTENCIÓN DE PENALIDAD (REQUISITO TP)
-# ==============================================================================
+
+
+# --------------------------------------------------------------------------------------------------
+# Barrido y obtención de la penalidad:
+# --------------------------------------------------------------------------------------------------
 def obtener_penalidad(M, Ntaps, mu, BW_limit):
     ebno_range = np.arange(10, 22, 1.0) 
     ber_sim = []
@@ -224,16 +232,16 @@ def obtener_penalidad(M, Ntaps, mu, BW_limit):
     penalty = ebno_sim_1e3 - ebno_teo_1e3
     return max(0.0, min(penalty, 15.0))
 
-# ==============================================================================
-# EJECUCIÓN 
-# ==============================================================================
+# --------------------------------------------------------------------------------------------------
+# Ejecución Final: 
+# --------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     M_qam = 16
     
-    # --------------------------------------------------------------------------
-    # PARTE 1: BARRIDO DE PENALIDAD (Requisitos del TP)
-    # --------------------------------------------------------------------------
-    print("--- Iniciando Barrido Masivo (Requisitos TP) ---")
+    # ----------------------------------------------------------------------------------------------
+    # PARTE 1: Barrido de la Penalidad (Parte Lenta)
+    # ----------------------------------------------------------------------------------------------
+    print("--- Iniciando Barrido Pesado ---")
     ntaps_list = [31, 63, 127, 255]
     mu_exponents = np.arange(-13, -3, 1.0)
     mu_list = 2.0**mu_exponents
@@ -261,26 +269,26 @@ if __name__ == "__main__":
 
     fig1.tight_layout()
     
-    # --------------------------------------------------------------------------
-    # PARTE 2: ANÁLISIS PROFUNDO (Constelaciones y Curva de Aprendizaje)
-    # --------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------------
+    # PARTE 2: Análisis Profundo (Constelaciones y Curva de Aprendizaje)
+    # ----------------------------------------------------------------------------------------------
     print("\n--- Generando Gráficas de Análisis (Constelaciones y Convergencia) ---")
     
-    # Elegimos un caso robusto: 63 taps, mu óptimo, con limitación de BW a 20 dB de EbNo
+    # Elegimos un caso robusto: 63 taps, mu óptimo, con limitación de BW a 20 dB de Eb/No.
     ntaps_test = 63
     mu_test = 2**(-7)
     L_test = 150000
-    cma_fraction = 0.3 # 30% del tiempo en CMA
+    cma_fraction = 0.3      # 30% del tiempo en CMA.
     
     _, rx_raw, rx_eq, err_hist = simular_fse(M=16, L=L_test, BR=32e9, N=2, 
                                              rolloff=0.5, h_taps=101, EbNo_db=20, 
                                              Ntaps=ntaps_test, mu=mu_test, 
                                              BW_limit=True, return_full=True)
 
-    # Figura 2: Constelaciones
+    # Figura 2: Constelaciones.
     fig2, (ax_raw, ax_eq) = plt.subplots(1, 2, figsize=(12, 6))
     
-    # Tomamos los últimos 5000 símbolos para ver el estado estable
+    # Tomamos los últimos 5000 símbolos para ver el estado estable.
     ax_raw.scatter(rx_raw[-5000:].real, rx_raw[-5000:].imag, alpha=0.3, color='red', s=5)
     ax_raw.set_title('Señal Recibida (Canal Limitado + Ruido)')
     ax_raw.grid(True, linestyle='--')
@@ -292,16 +300,16 @@ if __name__ == "__main__":
     ax_eq.axis('equal')
     fig2.tight_layout()
 
-    # Figura 3: Curva de Convergencia
+    # Figura 3: Curva de Convergencia.
     fig3, ax_err = plt.subplots(figsize=(10, 5))
     
-    # Suavizamos la curva de error con una media móvil para que se vea la tendencia
+    # Suavizamos la curva de error con una media móvil para que se vea la tendencia.
     window_size = 500
     err_smooth = np.convolve(err_hist, np.ones(window_size)/window_size, mode='valid')
     
     ax_err.plot(10 * np.log10(err_smooth + 1e-12), color='purple')
     
-    # Marcamos el punto exacto donde el código pasa de CMA a DD
+    # Marcamos el punto exacto donde el código pasa de CMA a DD.
     cma_switch_idx = int(L_test * cma_fraction)
     ax_err.axvline(x=cma_switch_idx, color='k', linestyle='--', label=r'Conmutación CMA $\rightarrow$ DD')
     
