@@ -249,31 +249,31 @@ En el punto exacto de conmutación, el algoritmo transiciona al modo Dirigido po
 
 
 \subsection{Ecualizador FSE \emph{MIMO} y Rotación del \emph{Estado de Polarización} (SOP)}                                            \label{sec_2.3}
-A modo de extensión del simulador con FSE desarrollado en la sección \ref{sec_2.2}, se incorporó un soporte a un esquema \emph{MIMO} (Multiple Input, Multiple Output) que utilizan los DSP cuando se transmiten señales utilizando las dos polarizaciones ortogonales de la luz (polarización H y V). La utilización de esta propiedad de la luz implica también tener en cuenta el fenómeno de la \emph{rotación del estado de polarización} (SOP), que mezcla las dos componentes de polarización. La velocidad a la que el SOP rota se denomina \emph{frecuencia de rotación} ($f_{SOP}$).
+A modo de extensión del simulador con \textit{FSE} desarrollado en la \autoref{sec_2.2}, se incorporó un soporte a un esquema \emph{MIMO} (Multiple Input, Multiple Output) que utilizan los \textit{DSP} cuando se transmiten señales utilizando las dos polarizaciones ortogonales de la luz (polarización H y V). La utilización de esta propiedad de la luz implica también tener en cuenta el fenómeno de la \emph{rotación del estado de polarización} (\textit{SOP}), que mezcla las dos componentes de polarización. La velocidad a la que el \textit{SOP} rota se denomina \emph{frecuencia de rotación} ($f_{SOP}$).
 
-Para este caso, se utilizó un simulador con un FSE MIMO $2\times 2$ brindado en el curso y realizado en Matlab, con la diferencia de que fue traducido a Python para mantener la coherencia con los demás scripts desarrollados anteriormente \cite{b3}. Este simulador incorpora un modelo de canal de fibra que contiene el modelo de SOP junto con los demás fenómenos vistos en el cursado, tales como la CD, la DGD (differential group delay) y la PMD (polarization mode dispersion); pero que en este caso no se trabajaron para poder diferenciar los efectos que la rotación del SOP produce junto a diferentes pasos de ecualización del FSE $2\times 2$.
+Para este caso, se utilizó un simulador con un \textit{FSE MIMO} $2\times 2$ brindado en el curso y realizado en \textit{Matlab}, con la diferencia de que fue traducido a \textit{Python} para mantener la coherencia con los demás scripts desarrollados anteriormente \cite{b3}. Este simulador incorpora un modelo de canal de fibra que contiene el modelo de \textit{SOP} junto con los demás fenómenos vistos en el cursado, tales como la \textit{CD}, la \textit{DGD} (differential group delay) y la \textit{PMD} (polarization mode dispersion); pero que en este caso no se trabajaron para poder diferenciar los efectos que la rotación del \textit{SOP} produce junto a diferentes pasos de ecualización del \textit{FSE} $2\times 2$.
 
-Utilizando este simulador, se realizó un barrido de la $f_{SOP}$ y el paso del ecualizador $\mu$ para calcular la \emph{penalidad de SNR} con $BER = 10^{-3}$. Para este caso se utilizó el mismo $\mu$ en el algoritmo CMA y DD.
+Utilizando este simulador, se realizó un barrido de la $f_{SOP}$ y el paso del ecualizador $\mu$ para calcular la \emph{penalidad de SNR} con $BER = 10^{-3} \, [dB]$. Para este caso se utilizó el mismo $\mu$ en el algoritmo \textit{CMA} y \textit{DD}.
 
-El resultado de este barrido se muestra en la figura \ref{fig:fig_10}, donde se observa que el paso con menor penalidad es de $0.002$ para hasta $30$\,kHz de rotación, luego pasa a ser $0.004$ y finalmente $0.006$ para altas frecuencias. Por otro lado, la penalidad se degrada significativamente a partir de $60$\,kHz pero solo para $\mu = 0.002$.
-
+El resultado de este barrido se muestra en la \autoref{fig:fig_10}, donde se observa que el paso con menor penalidad es de $0.002$ para hasta $30 \, [kHz]$ de rotación, luego pasa a ser $0.004$ y finalmente $0.006$ para altas frecuencias. Por otro lado, la penalidad se degrada significativamente a partir de $60 \, [kHz]$ pero solo para $\mu = 0.002$.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Figura 10.pdf}
-    \caption{Curva de penalidad de SNR según $f_{SOP}$ y $\mu$.}
+    \caption{Curva de penalidad de \textit{SNR} según $f_{SOP}$ y $\mu$.}
     \label{fig:fig_10}
 \end{figure}
 
 A partir de estas observaciones, se pueden extraer las siguientes conclusiones:
-
 \begin{itemize}
     \item No existe un $\mu$ óptimo que minimice la penalidad para todo el rango de $f_{SOP}$, sino que el óptimo cambia según $f_{SOP}$.
-    \item La penalidad comienza a degradarse a baja frecuencia solo si $\mu$ es muy bajo; se estima que a más alta frecuencia (200\,kHz) la penalidad aumenta más para $\mu$ más grande.
-    \item La capacidad de seguimiento (\emph{tracking}) del algoritmo DD se ve empeorada mientras sube la $f_{SOP}$, porque si $\mu$ es muy bajo, las muestras pueden caer en el slicer sobre una región de decisión distinta a la que deberían y los símbolos se desfasan $90^\circ$ en la constelación. El algoritmo no ve este cambio de alineación ya que solo optimiza el filtro para que la salida tenga la forma de un QAM-16.
+    \item La penalidad comienza a degradarse a baja frecuencia solo si $\mu$ es muy bajo; se estima que a más alta frecuencia ($200 \, [kHz]$) la penalidad aumenta más para $\mu$ más grande.
+    \item La capacidad de seguimiento (\emph{tracking}) del algoritmo \textit{DD} se ve empeorada mientras sube la $f_{SOP}$, porque si $\mu$ es muy bajo, las muestras pueden caer en el \textit{slicer} sobre una región de decisión distinta a la que deberían y los símbolos se desfasan $90^\circ$ en la constelación. El algoritmo no ve este cambio de alineación ya que solo optimiza el filtro para que la salida tenga la forma de un \textit{QAM-16}.
 \end{itemize}
 
+
+
 \section{Conclusiones}                                              \label{sec_3}
-Se estudiaron los ecualizadores BCDE, FSE unidimensional y FSE escalado a MIMO. El BCDE compensa de forma exacta el efecto de la CD, sin impacto en el BER, pero con una complejidad de implementación que crece linealmente con la longitud de fibra y el baudrate. Por otro lado, se observó cómo el algoritmo CMA del FSE abre el diagrama de ojo para luego refinar la convergencia con el algoritmo DD; también se observó que existe un valor óptimo de $\mu$ para cada tamaño de filtro. Cuando el FSE se extiende a un sistema MIMO, el $\mu$ óptimo depende de la $f_{SOP}$ y la capacidad de seguimiento del algoritmo DD corre riesgo de degradarse a altas frecuencias debido a desalineaciones de 90° en la constelación.
+Se estudiaron los ecualizadores \textit{BCDE}, \textit{FSE} unidimensional y \textit{FSE} escalado a \textit{MIMO}. El \textit{BCDE} compensa de forma exacta el efecto de la \textit{CD}, sin impacto en el \textit{BER}, pero con una complejidad de implementación que crece linealmente con la longitud de fibra y el Baudrate. Por otro lado, se observó cómo el algoritmo \textit{CMA} del \textit{FSE} abre el diagrama de ojo para luego refinar la convergencia con el algoritmo \textit{DD}; también se observó que existe un valor óptimo de $\mu$ para cada tamaño de filtro. Cuando el \textit{FSE} se extiende a un sistema \textit{MIMO}, el $\mu$ óptimo depende de la $f_{SOP}$ y la capacidad de seguimiento del algoritmo \textit{DD} corre riesgo de degradarse a altas frecuencias debido a desalineaciones de $90^\circ$ en la constelación.
 
 \newpage
 \printbibliography[heading=bibintoc, title={4. \ Referencias}]
